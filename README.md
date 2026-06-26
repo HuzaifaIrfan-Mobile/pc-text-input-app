@@ -1,17 +1,52 @@
 # pc_text_input_app
 
-A new Flutter project.
+v0.0.1
 
-## Getting Started
+Last Updated on 2026-06-26
+<hr />
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+Android app that turns Gboard into a wireless UTF-8 keyboard for Windows and Linux over HTTPS.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+<!-- 
+## 🎬 Demo
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+[▶️![Demo](https://img.youtube.com/vi/23YITX75awo/maxresdefault.jpg)](https://www.youtube.com/watch?v=23YITX75awo)
+ -->
+
+# 🚀 Usage
+
+
+## Run App
+
+```sh
+flutter run
+```
+
+## Build APK
+
+
+```sh
+flutter build apk
+```
+
+
+# 📝 Documentation
+
+# 📚 References
+
+# 🤝🏻 Connect with Me
+
+## Huzaifa Irfan
+
+- 💬 Just want to say hi?
+- 🚀 Have a project to discuss?
+- 📧 Email me @: [hi@huzaifairfan.com](mailto:hi@huzaifairfan.com)
+- 📞 Visit my Profile for other channels:
+
+[![GitHub](https://img.shields.io/badge/Github-%23222.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/HuzaifaIrfan/)
+[![Website](https://img.shields.io/badge/Website-%23222.svg?style=for-the-badge&logo=google-chrome&logoColor==%234285F4)](https://www.huzaifairfan.com)
+
+# 📜 License
+
+Licensed under the GPL3 License, Copyright 2026 Huzaifa Irfan. [LICENSE](LICENSE)
