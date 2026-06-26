@@ -13,6 +13,7 @@ Android app that turns Gboard into a wireless UTF-8 keyboard for Windows and Lin
 
 [▶️![Demo](https://img.youtube.com/vi/23YITX75awo/maxresdefault.jpg)](https://www.youtube.com/watch?v=23YITX75awo)
  -->
+https://github.com/HuzaifaIrfan-Desktop/pc-text-input-server
 
 # 🚀 Usage
 
