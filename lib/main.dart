@@ -172,6 +172,16 @@ class _HomePageState extends State<HomePage> {
                   child: TextField(
                     controller: controller,
                     focusNode: focusNode,
+                    autofocus: true,
+
+                    keyboardType: TextInputType.multiline,
+                    textInputAction: TextInputAction.newline,
+
+                    minLines: null,
+                    maxLines: null, // Unlimited
+
+                    expands: true,
+
                     decoration: InputDecoration(
                       hintText: "Type here...",
                       border: const OutlineInputBorder(),
