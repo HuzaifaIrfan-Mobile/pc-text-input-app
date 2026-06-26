@@ -8,12 +8,13 @@ Last Updated on 2026-06-26
 
 Android app that turns Gboard into a wireless UTF-8 keyboard for Windows and Linux over HTTPS.
 
-<!-- 
+https://github.com/HuzaifaIrfan-Desktop/pc-text-input-server
+
+
 ## 🎬 Demo
 
-[▶️![Demo](https://img.youtube.com/vi/23YITX75awo/maxresdefault.jpg)](https://www.youtube.com/watch?v=23YITX75awo)
- -->
-https://github.com/HuzaifaIrfan-Desktop/pc-text-input-server
+[▶️![Demo](https://img.youtube.com/vi/_5MbnwsO890/maxresdefault.jpg)](https://www.youtube.com/watch?v=_5MbnwsO890)
+
 
 ![cover](cover.png)
 
