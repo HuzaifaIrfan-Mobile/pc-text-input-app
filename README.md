@@ -13,7 +13,7 @@ https://github.com/HuzaifaIrfan-Desktop/pc-text-input-server
 
 ## 🎬 Demo
 
-[▶️![Demo](https://img.youtube.com/vi/_5MbnwsO890/maxresdefault.jpg)](https://www.youtube.com/watch?v=_5MbnwsO890)
+[▶️![Demo](https://img.youtube.com/vi/rv9DeyLV5Fg/maxresdefault.jpg)](https://www.youtube.com/watch?v=rv9DeyLV5Fg)
 
 
 ![cover](cover.png)
