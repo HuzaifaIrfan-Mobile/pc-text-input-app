@@ -6,7 +6,7 @@ Last Updated on 2026-06-27
 <hr />
 
 
-Android app that turns Gboard into a wireless UTF-8 keyboard for Windows and Linux over Secure HTTPS With JSON or QR Config
+Android app that turns Gboard into a wireless UTF-8 Chinese, Japanese, Arabic or Emoji keyboard for Windows and Linux over Secure HTTPS With JSON or QR Config Connection
 
 https://github.com/HuzaifaIrfan-Desktop/pc-text-input-server
 
@@ -20,6 +20,19 @@ https://github.com/HuzaifaIrfan-Desktop/pc-text-input-server
 
 # 🚀 Usage
 
+- Open App
+- Click Settings Button
+- Input Connection Details Generated From Server's setup.py
+    - Import JSON File **pairing_json.json** from Folder Icon
+    - Scan QR Image **pairing_qr.png** Generated in Server
+- Click Save in Settings Screen
+- Go Back
+- Type ANY Unicode Characters from Mobile keyboard. Chinese, Japanese, Arabic or Emoji.
+- Tap Arrow Send button to Paste the Input on PC
+
+
+
+# 🛠️ Development
 
 ## Run App
 
