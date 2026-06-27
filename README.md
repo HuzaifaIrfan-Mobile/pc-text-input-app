@@ -1,12 +1,12 @@
-# pc_text_input_app
+# PC Text Input App
 
-v0.0.1
+v0.2.0
 
-Last Updated on 2026-06-26
+Last Updated on 2026-06-27
 <hr />
 
 
-Android app that turns Gboard into a wireless UTF-8 keyboard for Windows and Linux over HTTPS.
+Android app that turns Gboard into a wireless UTF-8 keyboard for Windows and Linux over Secure HTTPS With JSON or QR Config
 
 https://github.com/HuzaifaIrfan-Desktop/pc-text-input-server
 

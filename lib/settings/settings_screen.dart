@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart'; // ^10.3.7
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../models/config.dart';
 import 'qr_screen.dart';
@@ -294,12 +295,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               const SizedBox(height: 24),
 
-              // ── Package versions footer ───────────────────────────────────
+              // ── Developer footer ─────────────────────────────────────────
               Text(
-                'shared_preferences ^2.5.5  ·  mobile_scanner ^7.2.0',
+                'v0.2.0',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall
                     ?.copyWith(color: theme.colorScheme.outline),
+              ),
+              const SizedBox(height: 6),
+              GestureDetector(
+                onTap: () => launchUrl(
+                  Uri.parse('https://huzaifairfan.com/'),
+                  mode: LaunchMode.externalApplication,
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Developed by Huzaifa Irfan',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: theme.colorScheme.outline),
+                    ),
+                    Text(
+                      'huzaifairfan.com',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

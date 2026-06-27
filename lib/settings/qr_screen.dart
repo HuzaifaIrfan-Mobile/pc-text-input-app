@@ -7,8 +7,6 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../models/config.dart';
 
-/// Full-screen QR scanner. Pops with a [Config] on success.
-/// On non-mobile platforms shows an "unsupported" message instead of the camera.
 class QrScreen extends StatefulWidget {
   const QrScreen({super.key});
 
@@ -29,7 +27,10 @@ class _QrScreenState extends State<QrScreen> {
   void initState() {
     super.initState();
     if (_isMobile) {
-      _controller = MobileScannerController();
+      _controller = MobileScannerController(
+        detectionSpeed: DetectionSpeed.normal,
+        facing: CameraFacing.back,
+      );
     }
   }
 
@@ -60,7 +61,7 @@ class _QrScreenState extends State<QrScreen> {
       appBar: AppBar(
         title: const Text('Scan QR Code'),
         actions: [
-          if (_isMobile)
+          if (_isMobile && _controller != null)
             IconButton(
               icon: const Icon(Icons.flash_on),
               tooltip: 'Toggle torch',
@@ -68,7 +69,9 @@ class _QrScreenState extends State<QrScreen> {
             ),
         ],
       ),
-      body: _isMobile ? _buildScanner() : _buildUnsupported(context),
+      body: _isMobile && _controller != null
+          ? _buildScanner()
+          : _buildUnsupported(),
     );
   }
 
@@ -78,8 +81,23 @@ class _QrScreenState extends State<QrScreen> {
         MobileScanner(
           controller: _controller!,
           onDetect: _onDetect,
+          errorBuilder: (context, error) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Camera error: ${error.errorCode.name}${error.errorDetails != null ? "\n${error.errorDetails}" : ""}',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          },
         ),
-        // Aim reticle overlay
+        // Aim reticle
         Center(
           child: Container(
             width: 240,
@@ -107,7 +125,7 @@ class _QrScreenState extends State<QrScreen> {
     );
   }
 
-  Widget _buildUnsupported(BuildContext context) {
+  Widget _buildUnsupported() {
     return const Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
