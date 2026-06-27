@@ -13,8 +13,11 @@ void main() async {
     DeviceOrientation.landscapeRight,
   ]);
 
-  // Hide status bar and navigation bar.
-  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  // Hide status bar, keep bottom navigation bar visible.
+  await SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.manual,
+    overlays: [SystemUiOverlay.bottom],
+  );
 
   // Load saved config or fall back to defaults.
   final config = await Config.load() ?? Config.defaults();
@@ -30,7 +33,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Remote Keyboard',
+      title: 'PC Text Input App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(colorSchemeSeed: Colors.blue, useMaterial3: true),
       home: HomePage(initialConfig: initialConfig),
@@ -67,7 +70,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
     WidgetsBinding.instance.addPostFrameCallback((_) => _refocus());
 
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    // Hide status bar, keep bottom navigation bar visible.
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: [SystemUiOverlay.bottom],
+    );
 
     _focusNode.addListener(() {
       if (!_isActive) return; // don't steal focus from pushed screens
