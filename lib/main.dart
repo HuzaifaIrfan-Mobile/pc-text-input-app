@@ -1,23 +1,9 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/io_client.dart';
 
-const host = "192.168.18.241";
-const port = 51237;
-
-const pairToken =
-    "b3213c498a637145f5e4cd1d214181f5696e8d525b81c6c9cfe30ff84b98d0c5";
-
-final baseUrl = "https://$host:$port";
-
-const headers = {
-  "Authorization": "Bearer $pairToken",
-  "Content-Type": "application/json",
-};
+import 'client/connection.dart';
+import 'models/config.dart';
+import 'settings/settings_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,11 +13,19 @@ void main() async {
     DeviceOrientation.landscapeRight,
   ]);
 
-  runApp(const MyApp());
+  // Hide status bar and navigation bar.
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+  // Load saved config or fall back to defaults.
+  final config = await Config.load() ?? Config.defaults();
+
+  runApp(MyApp(initialConfig: config));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Config initialConfig;
+
+  const MyApp({super.key, required this.initialConfig});
 
   @override
   Widget build(BuildContext context) {
@@ -39,106 +33,112 @@ class MyApp extends StatelessWidget {
       title: 'Remote Keyboard',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(colorSchemeSeed: Colors.blue, useMaterial3: true),
-      home: const HomePage(),
+      home: HomePage(initialConfig: initialConfig),
     );
   }
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final Config initialConfig;
+
+  const HomePage({super.key, required this.initialConfig});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  late final IOClient client;
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
+  late Config _config;
 
-  final controller = TextEditingController();
-  final focusNode = FocusNode();
+  final _connection = Connection.instance;
+  final _controller = TextEditingController();
+  final _focusNode = FocusNode();
 
-  bool sending = false;
+  bool _sending = false;
+
+  /// True only while this page is the top-most route.
+  /// Set to false before pushing any route, back to true after it pops.
+  bool _isActive = true;
 
   @override
   void initState() {
     super.initState();
+    _config = widget.initialConfig;
 
-    client = _createHttpClient();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refocus());
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      focusNode.requestFocus();
-      SystemChannels.textInput.invokeMethod('TextInput.show');
-    });
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
-    focusNode.addListener(() {
-      if (!focusNode.hasFocus) {
+    _focusNode.addListener(() {
+      if (!_isActive) return; // don't steal focus from pushed screens
+      if (!_focusNode.hasFocus) {
         Future.delayed(const Duration(milliseconds: 100), () {
-          if (!mounted) return;
-
-          focusNode.requestFocus();
-          SystemChannels.textInput.invokeMethod('TextInput.show');
+          if (!mounted || !_isActive) return;
+          _refocus();
         });
       }
     });
   }
 
-  IOClient _createHttpClient() {
-    final httpClient = HttpClient();
-
-    httpClient.badCertificateCallback =
-        (X509Certificate cert, String host, int port) {
-          // Accept self-signed certificate
-          return true;
-        };
-
-    return IOClient(httpClient);
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
   }
 
-  Future<void> sendText() async {
-    final text = controller.text.trim();
+  // ---------------------------------------------------------------------------
+  // Actions
+  // ---------------------------------------------------------------------------
 
-    if (text.isEmpty || sending) return;
+  Future<void> _sendText() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty || _sending) return;
 
-    setState(() {
-      sending = true;
-    });
+    setState(() => _sending = true);
 
-    try {
-      final response = await client.post(
-        Uri.parse("$baseUrl/paste_text"),
-        headers: headers,
-        body: jsonEncode({"text": text}),
-      );
+    final result = await _connection.pasteText(_config, text);
 
-      if (response.statusCode == 200) {
-        controller.clear();
-      } else {
-        _showSnackBar("Server Error ${response.statusCode}\n${response.body}");
-      }
-    } catch (e) {
-      _showSnackBar(e.toString());
+    if (result.success) {
+      _controller.clear();
+    } else {
+      _showSnackBar(result.errorMessage ?? 'Unknown error');
     }
 
-    setState(() {
-      sending = false;
-    });
+    setState(() => _sending = false);
 
-    focusNode.requestFocus();
-    SystemChannels.textInput.invokeMethod('TextInput.show');
+    _refocus();
   }
 
-  Future<void> backspace() async {
-    try {
-      await client.post(
-        Uri.parse("$baseUrl/backspace"),
-        headers: headers,
-        body: jsonEncode({"count": 1}),
-      );
-    } catch (e) {
-      _showSnackBar(e.toString());
+  Future<void> _backspace() async {
+    final result = await _connection.backspace(_config);
+    if (!result.success) {
+      _showSnackBar(result.errorMessage ?? 'Unknown error');
+    }
+    _refocus();
+  }
+
+  Future<void> _openSettings() async {
+    setState(() => _isActive = false); // pause focus stealing
+
+    final updated = await Navigator.of(context).push<Config>(
+      MaterialPageRoute(builder: (_) => SettingsScreen(current: _config)),
+    );
+
+    if (updated != null) {
+      setState(() => _config = updated);
     }
 
-    focusNode.requestFocus();
+    setState(() => _isActive = true); // resume focus stealing
+    _refocus();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+
+  void _refocus() {
+    _focusNode.requestFocus();
     SystemChannels.textInput.invokeMethod('TextInput.show');
   }
 
@@ -146,59 +146,58 @@ class _HomePageState extends State<HomePage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
-  @override
-  void dispose() {
-    client.close();
-    controller.dispose();
-    focusNode.dispose();
-    super.dispose();
-  }
+  // ---------------------------------------------------------------------------
+  // Build
+  // ---------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () {
-        focusNode.requestFocus();
-        SystemChannels.textInput.invokeMethod('TextInput.show');
-      },
+      onTap: _isActive ? _refocus : null,
       child: Scaffold(
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
+                // ── Settings ──────────────────────────────────────────
+                FilledButton(
+                  onPressed: _openSettings,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(56, 56),
+                    padding: EdgeInsets.zero,
+                  ),
+                  child: const Icon(Icons.settings),
+                ),
+
+                const SizedBox(width: 12),
+
+                // ── Text field ────────────────────────────────────────
                 Expanded(
                   child: TextField(
-                    controller: controller,
-                    focusNode: focusNode,
+                    controller: _controller,
+                    focusNode: _focusNode,
                     autofocus: true,
-
                     keyboardType: TextInputType.multiline,
                     textInputAction: TextInputAction.newline,
-
                     minLines: null,
-                    maxLines: null, // Unlimited
-
+                    maxLines: null,
                     expands: true,
-
                     decoration: InputDecoration(
-                      hintText: "Type here...",
+                      hintText: 'Type here…',
                       border: const OutlineInputBorder(),
                       suffixIcon: ValueListenableBuilder<TextEditingValue>(
-                        valueListenable: controller,
+                        valueListenable: _controller,
                         builder: (_, value, __) {
-                          if (value.text.isEmpty)
+                          if (value.text.isEmpty) {
                             return const SizedBox.shrink();
-
+                          }
                           return IconButton(
                             icon: const Icon(Icons.clear),
                             onPressed: () {
-                              controller.clear();
-                              focusNode.requestFocus();
-                              SystemChannels.textInput.invokeMethod(
-                                'TextInput.show',
-                              );
+                              _controller.clear();
+                              _refocus();
                             },
                           );
                         },
@@ -206,15 +205,17 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
+
                 const SizedBox(width: 12),
 
+                // ── Send ──────────────────────────────────────────────
                 FilledButton(
-                  onPressed: sending ? null : sendText,
+                  onPressed: _sending ? null : _sendText,
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(56, 56),
                     padding: EdgeInsets.zero,
                   ),
-                  child: sending
+                  child: _sending
                       ? const SizedBox(
                           width: 24,
                           height: 24,
@@ -225,8 +226,9 @@ class _HomePageState extends State<HomePage> {
 
                 const SizedBox(width: 12),
 
+                // ── Backspace ─────────────────────────────────────────
                 FilledButton(
-                  onPressed: backspace,
+                  onPressed: _backspace,
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(56, 56),
                     padding: EdgeInsets.zero,
